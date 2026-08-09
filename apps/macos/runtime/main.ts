@@ -1,6 +1,10 @@
-import { app, BrowserWindow, globalShortcut, ipcMain } from "electron";
+import { app, BrowserWindow, dialog, globalShortcut, ipcMain } from "electron";
+import type { MessageBoxOptions } from "electron";
+import { execFile } from "node:child_process";
 import path from "node:path";
+import { existsSync } from "node:fs";
 import { networkInterfaces } from "node:os";
+import { promisify } from "node:util";
 import { WebSocket, WebSocketServer } from "ws";
 
 let mainWindow: BrowserWindow | null = null;
@@ -10,12 +14,69 @@ const pairedSockets = new Set<WebSocket>();
 const remotePort = 8765;
 const pairingPin = String(Math.floor(100000 + Math.random() * 900000));
 const myInstantsOrigin = "https://www.myinstants.com";
+const execFileAsync = promisify(execFile);
+const installedDriverPath = "/Library/Audio/Plug-Ins/HAL/SoundpadMicrophone.driver";
 const allowedCategories = new Set([
   "anime & manga", "games", "memes", "movies", "music", "politics", "pranks",
   "reactions", "sound effects", "sports", "television", "tiktok trends", "viral", "whatsapp audios"
 ]);
 
 app.setName("Sonora Connect");
+
+function showMessage(options: MessageBoxOptions) {
+  return mainWindow ? dialog.showMessageBox(mainWindow, options) : dialog.showMessageBox(options);
+}
+
+async function ensureVirtualMicrophone() {
+  if (process.platform !== "darwin" || !app.isPackaged || existsSync(installedDriverPath)) return;
+
+  const bundledDriverPath = path.join(process.resourcesPath, "SoundpadMicrophone.driver");
+  if (!existsSync(bundledDriverPath)) {
+    await showMessage({
+      type: "error",
+      title: "Sonora Mix indisponível",
+      message: "O driver do Sonora Mix não foi encontrado dentro do aplicativo.",
+      detail: "Baixe novamente o Sonora pelo repositório oficial."
+    });
+    return;
+  }
+
+  const choice = await showMessage({
+    type: "info",
+    title: "Ativar Sonora Mix",
+    message: "Instale a entrada de áudio Sonora Mix",
+    detail: "Ela permite combinar sua voz com os sons do Android em chamadas, jogos e reuniões. O macOS solicitará sua senha uma única vez.",
+    buttons: ["Instalar agora", "Mais tarde"],
+    defaultId: 0,
+    cancelId: 1
+  });
+  if (choice.response !== 0) return;
+
+  const appleScript = `on run argv
+set sourcePath to item 1 of argv
+set targetPath to item 2 of argv
+set commandText to "/usr/bin/ditto " & quoted form of sourcePath & " " & quoted form of targetPath & " && /usr/sbin/chown -R root:wheel " & quoted form of targetPath & " && /bin/chmod -R 755 " & quoted form of targetPath & " && (/usr/bin/killall coreaudiod 2>/dev/null || true)"
+do shell script commandText with administrator privileges
+end run`;
+
+  try {
+    await execFileAsync("/usr/bin/osascript", ["-e", appleScript, "--", bundledDriverPath, installedDriverPath]);
+    await showMessage({
+      type: "info",
+      title: "Sonora Mix instalado",
+      message: "A entrada de áudio está pronta.",
+      detail: "Selecione Sonora Mix como microfone no aplicativo da sua chamada ou jogo."
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "A instalação foi cancelada.";
+    await showMessage({
+      type: "error",
+      title: "Não foi possível instalar o Sonora Mix",
+      message: "A entrada de áudio não foi instalada.",
+      detail: message.includes("User canceled") ? "Você pode tentar novamente ao reabrir o Sonora Connect." : message
+    });
+  }
+}
 
 function decodeHtml(value: string) {
   return value
@@ -201,6 +262,7 @@ app.whenReady().then(() => {
 
   ipcMain.handle("remote:info", () => ({ addresses: localAddresses(), port: remotePort, pin: pairingPin }));
   createWindow();
+  void ensureVirtualMicrophone();
   startRemoteServer();
   app.on("activate", () => BrowserWindow.getAllWindows().length === 0 && createWindow());
 });

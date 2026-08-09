@@ -2,16 +2,17 @@
 set -euo pipefail
 
 project_dir=${0:A:h:h}
-installer="$project_dir/release/Sonora.pkg"
+app="$project_dir/release/macos/mac-arm64/Sonora Connect.app"
 dmg_root=$(mktemp -d /private/tmp/sonora-dmg-root.XXXXXX)
 trap 'rm -rf "$dmg_root"' EXIT
 
-if [[ ! -f "$installer" ]]; then
-  print -u2 "O instalador Sonora.pkg ainda não foi gerado."
+if [[ ! -d "$app" ]]; then
+  print -u2 "O aplicativo Sonora Connect ainda não foi gerado."
   exit 1
 fi
 
-COPYFILE_DISABLE=1 ditto --noextattr --norsrc "$installer" "$dmg_root/Instalar Sonora.pkg"
+COPYFILE_DISABLE=1 ditto --noextattr --norsrc "$app" "$dmg_root/Sonora Connect.app"
+ln -s /Applications "$dmg_root/Aplicativos"
 xattr -cr "$dmg_root"
 
 hdiutil create \
