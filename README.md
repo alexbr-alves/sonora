@@ -20,10 +20,9 @@
 | Plataforma | Instalador | Requisitos |
 |---|---|---|
 | Android | [Baixar Sonora.apk](https://github.com/alexbr-alves/sonora/releases/latest/download/Sonora.apk) | Android 8 ou superior |
-| macOS | [Baixar Sonora-Connect.dmg](https://github.com/alexbr-alves/sonora/releases/latest/download/Sonora-Connect.dmg) | Mac com Apple Silicon |
-| Entrada virtual macOS | [Baixar Sonora-Mix.pkg](https://github.com/alexbr-alves/sonora/releases/latest/download/Sonora-Mix.pkg) | Necessário para enviar voz + pads à chamada |
+| macOS | [Baixar Sonora.pkg](https://github.com/alexbr-alves/sonora/releases/latest/download/Sonora.pkg) | Mac com Apple Silicon; instala app + Sonora Mix |
 
-> **Preview:** os instaladores ainda não usam certificados públicos de distribuição. O Android pode pedir autorização para instalar apps desconhecidos. No macOS, clique com o botão direito em **Sonora Connect** e escolha **Abrir** na primeira execução.
+> **Preview:** os instaladores ainda não usam certificados públicos de distribuição. O Android pode pedir autorização para instalar apps desconhecidos. No macOS, clique com o botão direito em `Sonora.pkg` e escolha **Abrir**.
 
 ## O que é o Sonora?
 
@@ -85,18 +84,19 @@ A atualização usa o mesmo identificador técnico das builds anteriores para pr
 
 ## Instalação no macOS
 
-1. Baixe e abra `Sonora-Connect.dmg`.
-2. Arraste **Sonora Connect** para **Aplicativos**.
-3. Baixe e abra `Sonora-Mix.pkg` para instalar a entrada virtual.
-4. Na primeira execução, clique com o botão direito no app e selecione **Abrir**.
-5. Autorize o acesso ao microfone quando solicitado.
+1. Baixe `Sonora.pkg`.
+2. Clique com o botão direito no arquivo e selecione **Abrir**.
+3. Avance pelo instalador e informe a senha do Mac uma vez.
+4. Abra **Sonora Connect** em Aplicativos e autorize o microfone quando solicitado.
+
+Esse único instalador coloca o aplicativo em **Aplicativos** e ativa a entrada virtual **Sonora Mix**. Não é necessário baixar ou instalar um segundo componente.
 
 ### Entrada virtual Sonora Mix
 
-O driver próprio está em [`native/macos/virtual-mic`](native/macos/virtual-mic). Usuários da versão publicada devem instalar `Sonora-Mix.pkg`. Para compilar e empacotar o driver a partir do código-fonte:
+O driver próprio está em [`native/macos/virtual-mic`](native/macos/virtual-mic). Ele é instalado junto com o aplicativo pelo pacote unificado. Para gerar o instalador completo a partir do código-fonte:
 
 ```bash
-pnpm mac:driver:package
+pnpm mac:installer
 ```
 
 O instalador reinicia o serviço de áudio. Em seguida, selecione **Sonora Mix** como entrada no aplicativo de chamada.
@@ -166,11 +166,11 @@ pnpm android:build
 
 Resultado: `apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk`.
 
-### Gerar o aplicativo e o DMG do macOS
+### Gerar o aplicativo e o instalador unificado do macOS
 
 ```bash
 pnpm mac:app
-pnpm mac:dmg
+pnpm mac:installer
 ```
 
 Resultados em `release/macos/`.
