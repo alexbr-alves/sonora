@@ -5,138 +5,168 @@
 <h1 align="center">Sonora</h1>
 
 <p align="center">
-  Um deck de sons para Android que injeta áudios, junto com a sua voz, em reuniões, chamadas e jogos no macOS.
+  <strong>Sua voz. Seus sons. Uma só entrada.</strong>
+</p>
+
+<p align="center">
+  Uma plataforma de áudio construída em público para chamadas, jogos, streams e reuniões.
 </p>
 
 <p align="center">
   <a href="https://github.com/alexbr-alves/sonora/releases/latest"><img alt="Última versão" src="https://img.shields.io/github/v/release/alexbr-alves/sonora?display_name=tag&style=flat-square&color=7c5ce5" /></a>
   <img alt="Android 8+" src="https://img.shields.io/badge/Android-8%2B-3ddc84?style=flat-square&logo=android&logoColor=white" />
   <img alt="macOS Apple Silicon" src="https://img.shields.io/badge/macOS-Apple%20Silicon-111111?style=flat-square&logo=apple&logoColor=white" />
-  <img alt="Status Preview" src="https://img.shields.io/badge/status-preview-b89cff?style=flat-square" />
+  <a href="https://github.com/alexbr-alves/sonora/issues"><img alt="Contribuições bem-vindas" src="https://img.shields.io/badge/contribuições-bem--vindas-b89cff?style=flat-square" /></a>
 </p>
 
-## Baixar
+## Conheça o Sonora
 
-| Plataforma | Instalador | Requisitos |
+O **Sonora** é um ecossistema de soundboard que coloca seus sons favoritos ao alcance de um toque e os leva diretamente para onde você já conversa, joga ou transmite.
+
+No Android, você organiza uma superfície de controle do seu jeito. No computador, o **Sonora Connect** recebe os comandos e combina os sons com a sua voz. Para o aplicativo de chamada, tudo chega por uma única entrada: **Sonora Mix**.
+
+O projeto nasceu para tornar esse fluxo simples, bonito e acessível — sem depender de hardware dedicado e sem prender sua biblioteca a um serviço online.
+
+## Baixe e experimente
+
+| Plataforma | Download | O que está incluído |
 |---|---|---|
-| Android | [Baixar Sonora.apk](https://github.com/alexbr-alves/sonora/releases/latest/download/Sonora.apk) | Android 8 ou superior |
-| macOS | [Baixar Sonora.pkg](https://github.com/alexbr-alves/sonora/releases/latest/download/Sonora.pkg) | Mac com Apple Silicon; instala app + Sonora Mix |
+| Android | [**Baixar Sonora.apk**](https://github.com/alexbr-alves/sonora/releases/latest/download/Sonora.apk) | Deck, layouts, biblioteca e descoberta de sons |
+| macOS | [**Baixar Sonora.pkg**](https://github.com/alexbr-alves/sonora/releases/latest/download/Sonora.pkg) | Sonora Connect e a entrada virtual Sonora Mix |
 
-> **Preview:** os instaladores ainda não usam certificados públicos de distribuição. O Android pode pedir autorização para instalar apps desconhecidos. No macOS, clique com o botão direito em `Sonora.pkg` e escolha **Abrir**.
+> O Sonora está em Preview. Os instaladores ainda não possuem assinaturas públicas de distribuição, portanto Android e macOS podem exibir uma confirmação de segurança na primeira instalação.
 
-## O que é o Sonora?
+## Feito para o seu ritmo
 
-O **Sonora** transforma um Android em um deck de sons inspirado em controladores físicos. Cada pad pode reproduzir um áudio instantaneamente no próprio aparelho ou enviá-lo por Wi‑Fi ao **Sonora Connect**.
+### Um espaço que se adapta a você
 
-No Mac, o Sonora Connect mistura dois sinais:
+Crie diferentes layouts para cada momento: reunião, stream, partida, podcast ou conversa com amigos. Escolha o tamanho da grade, organize os sons e navegue entre os painéis com um gesto.
 
-- Sua voz, capturada pelo microfone físico.
-- O áudio acionado no deck do Android.
+### Sua biblioteca sempre por perto
 
-O resultado aparece como **Sonora Mix**, uma entrada virtual selecionável no Meet, Zoom, Discord, Teams, jogos e outros aplicativos de chamada.
+Adicione arquivos do aparelho ou descubra novos sons pela pesquisa integrada. A biblioteca fica no seu dispositivo e pode ser usada mesmo quando nenhum computador está conectado.
+
+### Áudio sem disputa
+
+Quando um novo pad é acionado, o som anterior para automaticamente. Você mantém o controle da conversa e evita áudios sobrepostos.
+
+### Voz e sons juntos
+
+O Sonora Connect combina seu microfone com os pads. Você continua falando normalmente enquanto adiciona efeitos, reações, vinhetas ou qualquer áudio da sua biblioteca.
+
+### Pensado como uma superfície de controle
+
+No Deck, a tela permanece ativa, a interface ocupa todo o espaço disponível e acompanha a orientação do aparelho. Se o Android for bloqueado, o Sonora tenta recuperar a conexão automaticamente por até 10 minutos.
+
+## Como funciona
 
 ```mermaid
 flowchart LR
-    A["Sonora no Android"] -->|"Wi‑Fi + pareamento por QR Code"| B["Sonora Connect"]
-    C["Microfone físico"] --> B
+    A["Escolha um som no Sonora"] --> B["Sonora Connect recebe o áudio"]
+    C["Sua voz"] --> B
     B --> D["Sonora Mix"]
-    D --> E["Reunião, chamada ou jogo"]
-    B -. "retorno opcional" .-> F["Fone ou alto-falante"]
+    D --> E["Chamada, jogo ou stream"]
 ```
 
-## Principais recursos
+1. Abra o Sonora Connect no Mac.
+2. No Android, escaneie o QR Code exibido pelo computador.
+3. Escolha **Sonora Mix** como microfone no aplicativo que você usa.
+4. Toque em um pad e continue falando normalmente.
 
-- Deck em tela cheia, adaptado automaticamente à orientação do aparelho.
-- Grades configuráveis de `1×1` até `5×5`.
-- Múltiplos layouts, ordenação por arraste lógico e troca por gesto lateral.
-- Indicadores de página discretos na parte inferior.
-- Biblioteca local com importação de arquivos de áudio.
-- Pesquisa pública no MyInstants por texto, tendências e categorias.
-- Reprodução online direta, sem download obrigatório.
-- Um som por vez: o pad mais recente interrompe o anterior.
-- Reprodução local quando o Android não está conectado ao computador.
-- Pareamento automático por QR Code, com IP, porta e PIN.
-- Tela mantida ativa enquanto o usuário está no Deck.
-- Tolerância de 10 minutos ao bloqueio do Android, com reconexão automática.
-- Mistura automática de voz e pads na entrada virtual **Sonora Mix**.
-- Retorno opcional em fones ou alto-falantes para monitorar os pads.
-- Atualização da lista de dispositivos de áudio sempre que ela é aberta.
+O pareamento acontece pela sua rede Wi‑Fi. Não é necessário conectar o celular por cabo.
 
-## Como usar
+## O que já está disponível
 
-1. Instale o **Sonora** no Android.
-2. Instale e abra o **Sonora Connect** no Mac.
-3. No Android, abra **Conexão** e toque em **Ler QR Code**.
-4. Escaneie o QR Code exibido no Mac.
-5. No aplicativo de reunião ou jogo, escolha **Sonora Mix** como microfone.
-6. Volte ao Deck e toque em qualquer pad.
+- Interface em tela cheia e adaptável à orientação do Android.
+- Grades de `1×1` até `5×5`.
+- Vários layouts com ordem personalizável.
+- Biblioteca local com importação de áudios.
+- Pesquisa por texto, tendências e categorias.
+- Reprodução direta no Android quando estiver offline.
+- Conexão rápida por QR Code.
+- Mistura de voz e pads pelo Sonora Mix.
+- Retorno opcional para ouvir os pads no fone.
+- Reconexão automática após bloqueios curtos.
+- Identidade visual compartilhada entre Android e macOS.
 
-O retorno no Sonora Connect é opcional. Quando ativado, ele permite ouvir os pads sem devolver a sua própria voz ao fone.
+## Instalação
 
-## Instalação no Android
+### Android
 
-1. Baixe `Sonora.apk` no aparelho.
-2. Abra o arquivo baixado.
-3. Se solicitado, autorize o navegador ou gerenciador de arquivos a instalar apps desconhecidos.
+1. Baixe `Sonora.apk`.
+2. Abra o arquivo no aparelho.
+3. Caso o Android solicite, autorize a instalação de apps dessa fonte.
 4. Confirme a instalação.
 
-A atualização usa o mesmo identificador técnico das builds anteriores para preservar biblioteca e layouts existentes.
+As atualizações preservam a biblioteca e os layouts já criados.
 
-## Instalação no macOS
+### macOS
 
 1. Baixe `Sonora.pkg`.
-2. Clique com o botão direito no arquivo e selecione **Abrir**.
+2. Clique com o botão direito no arquivo e escolha **Abrir**.
 3. Avance pelo instalador e informe a senha do Mac uma vez.
-4. Abra **Sonora Connect** em Aplicativos e autorize o microfone quando solicitado.
+4. Abra o **Sonora Connect** pela pasta Aplicativos.
+5. Autorize o acesso ao microfone quando solicitado.
 
-Esse único instalador coloca o aplicativo em **Aplicativos** e ativa a entrada virtual **Sonora Mix**. Não é necessário baixar ou instalar um segundo componente.
+O mesmo instalador adiciona o Sonora Connect e ativa o Sonora Mix. Não há um segundo componente para baixar.
 
-### Entrada virtual Sonora Mix
+## Construído em público
 
-O driver próprio está em [`native/macos/virtual-mic`](native/macos/virtual-mic). Ele é instalado junto com o aplicativo pelo pacote unificado. Para gerar o instalador completo a partir do código-fonte:
+O Sonora cresce com experimentação, feedback e colaboração. Você pode participar de várias formas:
 
-```bash
-pnpm mac:installer
-```
+- Relatar um problema em [Issues](https://github.com/alexbr-alves/sonora/issues).
+- Sugerir uma experiência ou integração nova.
+- Melhorar documentação, acessibilidade ou traduções.
+- Enviar uma correção ou funcionalidade por Pull Request.
+- Testar uma release e compartilhar o comportamento no seu dispositivo.
 
-O instalador reinicia o serviço de áudio. Em seguida, selecione **Sonora Mix** como entrada no aplicativo de chamada.
+Antes de começar uma mudança grande, abra uma Issue para alinharmos a ideia e evitarmos trabalho duplicado.
 
-## Privacidade e rede
+## Para onde vamos
 
+- Sonora Connect para Windows.
+- Instaladores assinados e distribuição simplificada.
+- Personalização avançada dos pads.
+- Pastas, páginas e ações adicionais.
+- Mais opções de acessibilidade.
+- Atalhos e integrações para criadores de conteúdo.
+- Uma experiência de instalação ainda mais fluida.
+
+## Privacidade como padrão
+
+- Sua biblioteca permanece armazenada no Android.
 - O pareamento acontece diretamente na rede local.
-- Os pads são enviados do Android para o computador por WebSocket.
-- O PIN tem seis dígitos e é gerado pelo Sonora Connect a cada execução.
-- A biblioteca permanece armazenada localmente no Android.
-- Não existe conta, telemetria própria ou servidor Sonora nesta versão.
-- A pesquisa online consulta páginas públicas do MyInstants; o Sonora não é afiliado ao MyInstants.
+- Não é necessário criar uma conta.
+- O Sonora não possui telemetria própria nesta Preview.
+- A descoberta consulta páginas públicas do MyInstants; o Sonora não é afiliado ao serviço.
 
-## Estrutura do projeto
+<details>
+<summary><strong>Desenvolvimento e contribuição</strong></summary>
+
+### Estrutura
 
 ```text
 apps/
-├── mobile/              Android + Capacitor
-├── macos/               runtime e assets do Sonora Connect
-└── windows/             espaço reservado para a futura versão Windows
+├── mobile/              aplicativo Android
+├── macos/               Sonora Connect para macOS
+└── windows/             futura versão Windows
 native/
-└── macos/virtual-mic/    driver de áudio virtual Sonora Mix
+└── macos/virtual-mic/    entrada virtual Sonora Mix
 src/
-├── mobile/              Deck, layouts e biblioteca
-└── desktop/             interface compacta do Sonora Connect
-scripts/                 geração dos ícones do produto
+├── mobile/              experiência do Sonora
+└── desktop/             experiência do Sonora Connect
 ```
 
-O Electron é apenas a tecnologia interna de empacotamento do aplicativo para computador. Ele não faz parte do nome do produto.
-
-## Desenvolvimento
+O Electron é apenas uma tecnologia interna de empacotamento e não faz parte do nome do produto.
 
 ### Requisitos
 
 - Node.js 20 ou superior.
 - pnpm.
-- Android Studio/JDK para builds Android.
-- Xcode Command Line Tools para builds macOS e do driver.
+- Android Studio e JDK para builds Android.
+- Xcode Command Line Tools para builds macOS.
 
-### Preparar o projeto
+### Preparação
 
 ```bash
 git clone https://github.com/alexbr-alves/sonora.git
@@ -144,13 +174,13 @@ cd sonora
 pnpm install
 ```
 
-### Executar o ambiente desktop
+### Desenvolvimento local
 
 ```bash
 pnpm dev
 ```
 
-### Validar código e testes
+### Qualidade
 
 ```bash
 pnpm typecheck
@@ -158,42 +188,20 @@ pnpm test
 pnpm build
 ```
 
-### Gerar o APK Android
+### Instaladores
 
 ```bash
 pnpm android:build
-```
-
-Resultado: `apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk`.
-
-### Gerar o aplicativo e o instalador unificado do macOS
-
-```bash
-pnpm mac:app
 pnpm mac:installer
 ```
 
-Resultados em `release/macos/`.
+O APK é gerado em `apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk`. O instalador do macOS é gerado em `release/Sonora.pkg`.
 
-## Estado do projeto
-
-O Sonora está em desenvolvimento ativo. A versão atual é adequada para testes, uso pessoal e validação do fluxo completo Android → Mac → microfone virtual.
-
-### Próximos passos
-
-- Assinatura e notarização dos instaladores macOS.
-- Keystore Android de produção e distribuição pela Play Store.
-- Instalação guiada do Sonora Mix.
-- Aplicativo Sonora Connect para Windows.
-- Editor avançado de aparência dos pads.
-- Atalhos, pastas e ações adicionais por layout.
-
-## Autor
-
-Desenvolvido por **[alexbr-alves](https://github.com/alexbr-alves)**.
-
-Contato: [alexbr.alves@gmail.com](mailto:alexbr.alves@gmail.com)
+</details>
 
 ---
 
-<p align="center">Sonora no Android. Sonora Connect no computador. Sua voz e seus sons, juntos.</p>
+<p align="center">
+  <strong>Sonora</strong><br />
+  Transforme qualquer momento em uma experiência sonora.
+</p>
