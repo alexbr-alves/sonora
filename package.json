@@ -49,6 +49,7 @@
     "mac:driver:build": "zsh native/macos/virtual-mic/build-driver.sh",
     "mac:app": "pnpm build && electron-builder --mac dir",
     "mac:installer": "pnpm mac:driver:build && pnpm mac:app && zsh scripts/build-macos-installer.sh",
+    "mac:dmg": "pnpm mac:installer && zsh scripts/build-macos-dmg.sh",
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty false",
     "test": "vitest run",

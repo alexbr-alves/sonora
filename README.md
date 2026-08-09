@@ -32,9 +32,9 @@ O projeto nasceu para tornar esse fluxo simples, bonito e acessível — sem dep
 | Plataforma | Download | O que está incluído |
 |---|---|---|
 | Android | [**Baixar Sonora.apk**](https://github.com/alexbr-alves/sonora/releases/latest/download/Sonora.apk) | Deck, layouts, biblioteca e descoberta de sons |
-| macOS | [**Baixar Sonora.pkg**](https://github.com/alexbr-alves/sonora/releases/latest/download/Sonora.pkg) | Sonora Connect e a entrada virtual Sonora Mix |
+| macOS | [**Baixar Sonora.dmg**](https://github.com/alexbr-alves/sonora/releases/latest/download/Sonora.dmg) | Sonora Connect e a entrada virtual Sonora Mix |
 
-> O Sonora está em Preview. Os instaladores ainda não possuem assinaturas públicas de distribuição, portanto Android e macOS podem exibir uma confirmação de segurança na primeira instalação.
+> O Sonora está em Preview. Os instaladores ainda não possuem assinaturas públicas de distribuição, portanto Android e macOS podem exibir uma confirmação de segurança na primeira instalação. A assinatura e a notarização pela Apple fazem parte do roadmap.
 
 ## Feito para o seu ritmo
 
@@ -102,13 +102,13 @@ As atualizações preservam a biblioteca e os layouts já criados.
 
 ### macOS
 
-1. Baixe `Sonora.pkg`.
-2. Clique com o botão direito no arquivo e escolha **Abrir**.
+1. Baixe e abra `Sonora.dmg`.
+2. Dentro da imagem, clique com o botão direito em **Instalar Sonora.pkg** e escolha **Abrir**.
 3. Avance pelo instalador e informe a senha do Mac uma vez.
 4. Abra o **Sonora Connect** pela pasta Aplicativos.
 5. Autorize o acesso ao microfone quando solicitado.
 
-O mesmo instalador adiciona o Sonora Connect e ativa o Sonora Mix. Não há um segundo componente para baixar.
+O DMG contém um único instalador, que adiciona o Sonora Connect e ativa o Sonora Mix. Não há um segundo componente para baixar.
 
 ## Construído em público
 
@@ -192,10 +192,10 @@ pnpm build
 
 ```bash
 pnpm android:build
-pnpm mac:installer
+pnpm mac:dmg
 ```
 
-O APK é gerado em `apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk`. O instalador do macOS é gerado em `release/Sonora.pkg`.
+O APK é gerado em `apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk`. O instalador público do macOS é gerado em `release/Sonora.dmg`.
 
 </details>
 
