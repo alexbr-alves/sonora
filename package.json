@@ -20,7 +20,31 @@
   "build": {
     "appId": "com.sonora.connect",
     "mac": {
-      "icon": "apps/macos/assets/icon.icns"
+      "icon": "apps/macos/assets/icon.icns",
+      "extraResources": [
+        {
+          "from": "native/macos/virtual-mic/build/SoundpadMicrophone.driver",
+          "to": "SoundpadMicrophone.driver"
+        }
+      ]
+    },
+    "win": {
+      "icon": "apps/macos/assets/icon.png",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "Sonora-Windows.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Sonora Connect",
+      "uninstallDisplayName": "Sonora Connect"
     },
     "directories": {
       "output": "release/macos"
@@ -36,10 +60,6 @@
       {
         "from": "apps/macos/assets/icon.png",
         "to": "icon.png"
-      },
-      {
-        "from": "native/macos/virtual-mic/build/SoundpadMicrophone.driver",
-        "to": "SoundpadMicrophone.driver"
       }
     ]
   },
@@ -54,6 +74,7 @@
     "mac:app": "pnpm build && electron-builder --mac dir",
     "mac:installer": "pnpm mac:driver:build && pnpm mac:app && zsh scripts/build-macos-installer.sh",
     "mac:dmg": "pnpm mac:driver:build && pnpm mac:app && zsh scripts/build-macos-dmg.sh",
+    "windows:exe": "pnpm build && electron-builder --win nsis --x64 --config.directories.output=release/windows",
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty false",
     "test": "vitest run",

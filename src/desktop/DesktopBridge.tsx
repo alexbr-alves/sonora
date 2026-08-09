@@ -153,6 +153,7 @@ export default function DesktopBridge() {
   const address = info ? `${info.addresses[0] ?? "Sem rede"}:${info.port}` : "Carregando...";
   const virtualMicReady = outputs.some((device) => isVirtualMic(device.label));
   const outputOptions = outputs.filter((device) => device.deviceId !== "default");
+  const systemName = window.soundpadDesktop?.platform === "win32" ? "Windows" : "Mac";
 
   return (
     <main className="bridge">
@@ -180,7 +181,7 @@ export default function DesktopBridge() {
           <div className="output-title"><Headphones size={18} /><div><label>RETORNO</label><p>Ouça os pads no seu fone</p></div></div>
           <button className={`mini-toggle ${monitorEnabled ? "active" : ""}`} onClick={() => updateMonitor(!monitorEnabled)}>{monitorEnabled ? "Ligado" : "Desligado"}</button>
         </div>
-        {monitorEnabled && <select value={monitorOutputId} onPointerDown={() => void refreshDevices()} onFocus={() => void refreshDevices()} onChange={(event) => { setMonitorOutputId(event.target.value); localStorage.setItem("soundpad:monitor-output", event.target.value); }}><option value="default">Saída padrão do Mac</option>{outputOptions.map((device, index) => <option key={device.deviceId} value={device.deviceId}>{device.label || `Saída ${index + 1}`}</option>)}</select>}
+        {monitorEnabled && <select value={monitorOutputId} onPointerDown={() => void refreshDevices()} onFocus={() => void refreshDevices()} onChange={(event) => { setMonitorOutputId(event.target.value); localStorage.setItem("soundpad:monitor-output", event.target.value); }}><option value="default">Saída padrão do {systemName}</option>{outputOptions.map((device, index) => <option key={device.deviceId} value={device.deviceId}>{device.label || `Saída ${index + 1}`}</option>)}</select>}
       </section>
 
       <footer><Volume2 size={15} /><div><label>ÚLTIMO COMANDO</label><p>{nowPlaying}</p></div></footer>

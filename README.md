@@ -16,6 +16,7 @@
   <a href="https://github.com/alexbr-alves/sonora/releases/latest"><img alt="Última versão" src="https://img.shields.io/github/v/release/alexbr-alves/sonora?display_name=tag&style=flat-square&color=7c5ce5" /></a>
   <img alt="Android 8+" src="https://img.shields.io/badge/Android-8%2B-3ddc84?style=flat-square&logo=android&logoColor=white" />
   <img alt="macOS Apple Silicon" src="https://img.shields.io/badge/macOS-Apple%20Silicon-111111?style=flat-square&logo=apple&logoColor=white" />
+  <img alt="Windows x64" src="https://img.shields.io/badge/Windows-x64-0078d4?style=flat-square&logo=windows11&logoColor=white" />
   <a href="https://github.com/alexbr-alves/sonora/issues"><img alt="Contribuições bem-vindas" src="https://img.shields.io/badge/contribuições-bem--vindas-b89cff?style=flat-square" /></a>
 </p>
 
@@ -33,8 +34,9 @@ O projeto nasceu para tornar esse fluxo simples, bonito e acessível — sem dep
 |---|---|---|
 | Android | [**Baixar Sonora.apk**](https://github.com/alexbr-alves/sonora/releases/latest/download/Sonora.apk) | Deck, layouts, biblioteca e descoberta de sons |
 | macOS | [**Baixar Sonora.dmg**](https://github.com/alexbr-alves/sonora/releases/latest/download/Sonora.dmg) | Sonora Connect e a entrada virtual Sonora Mix |
+| Windows | [**Baixar Sonora-Windows.exe**](https://github.com/alexbr-alves/sonora/releases/latest/download/Sonora-Windows.exe) | Preview do Sonora Connect para conexão e reprodução local |
 
-> O Sonora está em Preview. Os instaladores ainda não possuem assinaturas públicas de distribuição, portanto Android e macOS podem exibir uma confirmação de segurança na primeira instalação. A assinatura e a notarização pela Apple fazem parte do roadmap.
+> O Sonora está em Preview. Os instaladores ainda não possuem assinaturas públicas de distribuição, portanto os sistemas podem exibir uma confirmação de segurança na primeira instalação. A assinatura pública faz parte do roadmap.
 
 ## Feito para o seu ritmo
 
@@ -68,7 +70,7 @@ flowchart LR
     D --> E["Chamada, jogo ou stream"]
 ```
 
-1. Abra o Sonora Connect no Mac.
+1. Abra o Sonora Connect no computador.
 2. No Android, escaneie o QR Code exibido pelo computador.
 3. Escolha **Sonora Mix** como microfone no aplicativo que você usa.
 4. Toque em um pad e continue falando normalmente.
@@ -87,7 +89,7 @@ O pareamento acontece pela sua rede Wi‑Fi. Não é necessário conectar o celu
 - Mistura de voz e pads pelo Sonora Mix.
 - Retorno opcional para ouvir os pads no fone.
 - Reconexão automática após bloqueios curtos.
-- Identidade visual compartilhada entre Android e macOS.
+- Identidade visual compartilhada entre Android, macOS e Windows.
 
 ## Instalação
 
@@ -115,6 +117,16 @@ As atualizações preservam a biblioteca e os layouts já criados.
 
 O DMG contém tudo o que o Sonora precisa. O próprio aplicativo instala e ativa o Sonora Mix na primeira execução; não há `.pkg` nem um segundo componente para baixar.
 
+### Windows
+
+1. Baixe `Sonora-Windows.exe`.
+2. Abra o instalador. Se o SmartScreen exibir **O Windows protegeu o computador**, clique em **Mais informações → Executar assim mesmo**.
+3. Avance pelas etapas do instalador.
+4. Se o Windows Defender solicitar acesso à rede, permita em **Redes privadas** para que o Android encontre o computador.
+5. Abra o Sonora Connect e escaneie o QR Code pelo Android.
+
+> Esta é uma Preview inicial para validação no Windows `x64`. A conexão, o recebimento dos pads e a reprodução local já estão disponíveis. A entrada virtual **Sonora Mix** será adicionada em uma próxima etapa; nesta versão, os sons ainda não aparecem como microfone nas chamadas.
+
 ## Construído em público
 
 O Sonora cresce com experimentação, feedback e colaboração. Você pode participar de várias formas:
@@ -129,7 +141,7 @@ Antes de começar uma mudança grande, abra uma Issue para alinharmos a ideia e 
 
 ## Para onde vamos
 
-- Sonora Connect para Windows.
+- Entrada virtual Sonora Mix para Windows.
 - Instaladores assinados e distribuição simplificada.
 - Personalização avançada dos pads.
 - Pastas, páginas e ações adicionais.
@@ -154,7 +166,7 @@ Antes de começar uma mudança grande, abra uma Issue para alinharmos a ideia e 
 apps/
 ├── mobile/              aplicativo Android
 ├── macos/               Sonora Connect para macOS
-└── windows/             futura versão Windows
+└── windows/             Sonora Connect para Windows
 native/
 └── macos/virtual-mic/    entrada virtual Sonora Mix
 src/
@@ -170,6 +182,7 @@ O Electron é apenas uma tecnologia interna de empacotamento e não faz parte do
 - pnpm.
 - Android Studio e JDK para builds Android.
 - Xcode Command Line Tools para builds macOS.
+- Windows, Visual Studio e WDK para o futuro driver Sonora Mix.
 
 ### Preparação
 
@@ -198,9 +211,10 @@ pnpm build
 ```bash
 pnpm android:build
 pnpm mac:dmg
+pnpm windows:exe
 ```
 
-O APK é gerado em `apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk`. O instalador público do macOS é gerado em `release/Sonora.dmg`.
+O APK é gerado em `apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk`. Os instaladores desktop são gerados em `release/Sonora.dmg` e `release/windows/Sonora-Windows.exe`.
 
 </details>
 
