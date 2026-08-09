@@ -104,10 +104,14 @@ As atualizações preservam a biblioteca e os layouts já criados.
 
 1. Baixe e abra `Sonora.dmg`.
 2. Arraste o **Sonora Connect** para o atalho **Aplicativos**.
-3. Na pasta Aplicativos, clique com o botão direito no Sonora Connect e escolha **Abrir**.
-4. Confirme a abertura no primeiro aviso do macOS.
-5. No Sonora Connect, escolha **Instalar agora** para ativar o Sonora Mix e informe a senha do Mac uma vez.
-6. Autorize o acesso ao microfone quando solicitado.
+3. Abra o Sonora Connect pela pasta Aplicativos. Se o macOS bloquear a abertura, clique em **OK** — não escolha **Mover para o Lixo**.
+4. Abra **Ajustes do Sistema → Privacidade e Segurança**.
+5. Role até **Segurança** e, ao lado da mensagem sobre o Sonora Connect, clique em **Abrir Mesmo Assim**.
+6. Confirme com sua senha ou Touch ID e clique em **Abrir** na confirmação seguinte.
+7. No Sonora Connect, escolha **Instalar agora** para ativar o Sonora Mix e informe a senha do Mac uma vez.
+8. Autorize o acesso ao microfone quando solicitado.
+
+> O Sonora ainda não possui assinatura pública da Apple. A opção **Abrir Mesmo Assim** aparece somente depois da primeira tentativa de abertura e fica disponível por aproximadamente uma hora. A liberação precisa ser feita apenas uma vez para a versão instalada. Consulte também as [instruções oficiais da Apple](https://support.apple.com/guide/mac-help/mh40616/mac).
 
 O DMG contém tudo o que o Sonora precisa. O próprio aplicativo instala e ativa o Sonora Mix na primeira execução; não há `.pkg` nem um segundo componente para baixar.
 
