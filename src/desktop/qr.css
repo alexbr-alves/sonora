@@ -1,0 +1,31 @@
+.qr-pair {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 17px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid #252a34;
+}
+
+.qr-pair img {
+  width: 108px;
+  height: 108px;
+  padding: 5px;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.qr-pair div {
+  display: grid;
+  gap: 5px;
+}
+
+.qr-pair strong {
+  font-size: 11px;
+}
+
+.qr-pair span {
+  color: #6f7582;
+  font-size: 9px;
+  line-height: 1.4;
+}

@@ -1,0 +1,4 @@
+#!/bin/zsh
+
+killall coreaudiod 2>/dev/null || true
+exit 0

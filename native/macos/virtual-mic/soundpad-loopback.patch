@@ -1,0 +1,187 @@
+--- NullAudio.c
++++ NullAudio.c
+@@ -1951,15 +1951,15 @@
+ 			switch(inAddress->mScope)
+ 			{
+ 				case kAudioObjectPropertyScopeGlobal:
+-					*outDataSize = 8 * sizeof(AudioObjectID);
++					*outDataSize = 6 * sizeof(AudioObjectID);
+ 					break;
+ 					
+ 				case kAudioObjectPropertyScopeInput:
+-					*outDataSize = 4 * sizeof(AudioObjectID);
++					*outDataSize = 3 * sizeof(AudioObjectID);
+ 					break;
+ 					
+ 				case kAudioObjectPropertyScopeOutput:
+-					*outDataSize = 4 * sizeof(AudioObjectID);
++					*outDataSize = 3 * sizeof(AudioObjectID);
+ 					break;
+ 			};
+ 			break;
+@@ -2022,7 +2022,7 @@
+ 			break;
+
+ 		case kAudioObjectPropertyControlList:
+-			*outDataSize = 7 * sizeof(AudioObjectID);
++			*outDataSize = 4 * sizeof(AudioObjectID);
+ 			break;
+
+ 		case kAudioDevicePropertySafetyOffset:
+@@ -2113,7 +2113,7 @@
+ 		case kAudioObjectPropertyName:
+ 			//	This is the human readable name of the device.
+ 			FailWithAction(inDataSize < sizeof(CFStringRef), theAnswer = kAudioHardwareBadPropertySizeError, Done, "NullAudio_GetDevicePropertyData: not enough space for the return value of kAudioObjectPropertyName for the device");
+-			*((CFStringRef*)outData) = CFSTR("DeviceName");
++			*((CFStringRef*)outData) = CFSTR("Sonora Mix");
+ 			*outDataSize = sizeof(CFStringRef);
+ 			break;
+ 			
+@@ -2161,23 +2161,20 @@
+ 			{
+ 				case kAudioObjectPropertyScopeGlobal:
+ 					//	global scope means return all objects
+-					if(theNumberItemsToFetch > 9)
++					if(theNumberItemsToFetch > 6)
+ 					{
+-						theNumberItemsToFetch = 9;
++						theNumberItemsToFetch = 6;
+ 					}
+ 					
+-					//	fill out the list with as many objects as requested, which is everything
+-					for(theItemIndex = 0; theItemIndex < theNumberItemsToFetch; ++theItemIndex)
+-					{
+-						((AudioObjectID*)outData)[theItemIndex] = kObjectID_Stream_Input + theItemIndex;
+-					}
++					const AudioObjectID allObjects[] = { kObjectID_Stream_Input, kObjectID_Volume_Input_Master, kObjectID_Mute_Input_Master, kObjectID_Stream_Output, kObjectID_Volume_Output_Master, kObjectID_Mute_Output_Master };
++					memcpy(outData, allObjects, theNumberItemsToFetch * sizeof(AudioObjectID));
+ 					break;
+ 					
+ 				case kAudioObjectPropertyScopeInput:
+ 					//	input scope means just the objects on the input side
+-					if(theNumberItemsToFetch > 4)
++					if(theNumberItemsToFetch > 3)
+ 					{
+-						theNumberItemsToFetch = 4;
++						theNumberItemsToFetch = 3;
+ 					}
+ 					
+ 					//	fill out the list with the right objects
+@@ -2189,9 +2186,9 @@
+ 					
+ 				case kAudioObjectPropertyScopeOutput:
+ 					//	output scope means just the objects on the output side
+-					if(theNumberItemsToFetch > 4)
++					if(theNumberItemsToFetch > 3)
+ 					{
+-						theNumberItemsToFetch = 4;
++						theNumberItemsToFetch = 3;
+ 					}
+ 					
+ 					//	fill out the list with the right objects
+@@ -2387,23 +2384,13 @@
+ 			//	number is allowed to be smaller than the actual size of the list. In such
+ 			//	case, only that number of items will be returned
+ 			theNumberItemsToFetch = inDataSize / sizeof(AudioObjectID);
+-			if(theNumberItemsToFetch > 7)
++			if(theNumberItemsToFetch > 4)
+ 			{
+-				theNumberItemsToFetch = 7;
++				theNumberItemsToFetch = 4;
+ 			}
+ 			
+-			//	fill out the list with as many objects as requested, which is everything
+-			for(theItemIndex = 0; theItemIndex < theNumberItemsToFetch; ++theItemIndex)
+-			{
+-				if(theItemIndex < 3)
+-				{
+-					((AudioObjectID*)outData)[theItemIndex] = kObjectID_Volume_Input_Master + theItemIndex;
+-				}
+-				else
+-				{
+-					((AudioObjectID*)outData)[theItemIndex] = kObjectID_Volume_Output_Master + (theItemIndex - 3);
+-				}
+-			}
++			const AudioObjectID controls[] = { kObjectID_Volume_Input_Master, kObjectID_Mute_Input_Master, kObjectID_Volume_Output_Master, kObjectID_Mute_Output_Master };
++			memcpy(outData, controls, theNumberItemsToFetch * sizeof(AudioObjectID));
+ 			
+ 			//	report how much we wrote
+ 			*outDataSize = theNumberItemsToFetch * sizeof(AudioObjectID);
+@@ -4007,6 +3994,10 @@
+ 		gDevice_NumberTimeStamps = 0;
+ 		gDevice_AnchorSampleTime = 0;
+ 		gDevice_AnchorHostTime = mach_absolute_time();
++		pthread_mutex_lock(&gDevice_IOMutex);
++		gLoopback_ReadFrame = 0;
++		gLoopback_AvailableFrames = 0;
++		pthread_mutex_unlock(&gDevice_IOMutex);
+ 	}
+ 	else
+ 	{
+@@ -4180,8 +4171,8 @@
+
+ static OSStatus	NullAudio_DoIOOperation(AudioServerPlugInDriverRef inDriver, AudioObjectID inDeviceObjectID, AudioObjectID inStreamObjectID, UInt32 inClientID, UInt32 inOperationID, UInt32 inIOBufferFrameSize, const AudioServerPlugInIOCycleInfo* inIOCycleInfo, void* ioMainBuffer, void* ioSecondaryBuffer)
+ {
+-	//	This is called to actuall perform a given operation. For this device, all we need to do is
+-	//	clear the buffer for the ReadInput operation.
++	//	The output stream is copied into a bounded stereo ring buffer. The input stream reads that
++	//	buffer, turning audio played to this device into microphone input for conferencing apps.
+ 	
+ 	#pragma unused(inClientID, inIOCycleInfo, ioSecondaryBuffer)
+ 	
+@@ -4193,13 +4184,52 @@
+ 	FailWithAction(inDeviceObjectID != kObjectID_Device, theAnswer = kAudioHardwareBadObjectError, Done, "NullAudio_DoIOOperation: bad device ID");
+ 	FailWithAction((inStreamObjectID != kObjectID_Stream_Input) && (inStreamObjectID != kObjectID_Stream_Output), theAnswer = kAudioHardwareBadObjectError, Done, "NullAudio_DoIOOperation: bad stream ID");
+
+-	//	clear the buffer if this iskAudioServerPlugInIOOperationReadInput
++	Float32* theBuffer = (Float32*)ioMainBuffer;
++	pthread_mutex_lock(&gDevice_IOMutex);
++
+ 	if(inOperationID == kAudioServerPlugInIOOperationReadInput)
+ 	{
+-		//	we are always dealing with a 2 channel 32 bit float buffer
+-		memset(ioMainBuffer, 0, inIOBufferFrameSize * 8);
++		UInt32 framesToRead = inIOBufferFrameSize;
++		if(framesToRead > gLoopback_AvailableFrames)
++		{
++			framesToRead = gLoopback_AvailableFrames;
++		}
++		for(UInt32 frame = 0; frame < framesToRead; ++frame)
++		{
++			UInt32 ringFrame = (gLoopback_ReadFrame + frame) % kDevice_RingBufferSize;
++			theBuffer[frame * 2] = gLoopback_Buffer[ringFrame * 2];
++			theBuffer[frame * 2 + 1] = gLoopback_Buffer[ringFrame * 2 + 1];
++		}
++		if(framesToRead < inIOBufferFrameSize)
++		{
++			memset(theBuffer + framesToRead * 2, 0, (inIOBufferFrameSize - framesToRead) * 2 * sizeof(Float32));
++		}
++		gLoopback_ReadFrame = (gLoopback_ReadFrame + framesToRead) % kDevice_RingBufferSize;
++		gLoopback_AvailableFrames -= framesToRead;
+ 	}
++	else if(inOperationID == kAudioServerPlugInIOOperationWriteMix)
++	{
++		UInt32 sourceOffset = inIOBufferFrameSize > kDevice_RingBufferSize ? inIOBufferFrameSize - kDevice_RingBufferSize : 0;
++		UInt32 framesToWrite = inIOBufferFrameSize - sourceOffset;
++		UInt32 freeFrames = kDevice_RingBufferSize - gLoopback_AvailableFrames;
++		if(framesToWrite > freeFrames)
++		{
++			UInt32 framesToDrop = framesToWrite - freeFrames;
++			gLoopback_ReadFrame = (gLoopback_ReadFrame + framesToDrop) % kDevice_RingBufferSize;
++			gLoopback_AvailableFrames -= framesToDrop;
++		}
++		UInt32 writeFrame = (gLoopback_ReadFrame + gLoopback_AvailableFrames) % kDevice_RingBufferSize;
++		for(UInt32 frame = 0; frame < framesToWrite; ++frame)
++		{
++			UInt32 ringFrame = (writeFrame + frame) % kDevice_RingBufferSize;
++			gLoopback_Buffer[ringFrame * 2] = theBuffer[(sourceOffset + frame) * 2];
++			gLoopback_Buffer[ringFrame * 2 + 1] = theBuffer[(sourceOffset + frame) * 2 + 1];
++		}
++		gLoopback_AvailableFrames += framesToWrite;
++	}
+
++	pthread_mutex_unlock(&gDevice_IOMutex);
++
+ Done:
+ 	return theAnswer;
+ }

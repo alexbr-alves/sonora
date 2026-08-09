@@ -1,0 +1,87 @@
+{
+  "name": "sonora",
+  "productName": "Sonora Connect",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sonora: áudios instantâneos para reuniões, chamadas e jogos",
+  "author": {
+    "name": "alexbr-alves",
+    "email": "alexbr.alves@gmail.com"
+  },
+  "homepage": "https://github.com/alexbr-alves/sonora#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexbr-alves/sonora.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alexbr-alves/sonora/issues"
+  },
+  "main": "apps/macos/dist-runtime/main.js",
+  "build": {
+    "appId": "com.sonora.connect",
+    "mac": {
+      "icon": "apps/macos/assets/icon.icns"
+    },
+    "directories": {
+      "output": "release/macos"
+    },
+    "files": [
+      "dist/**/*",
+      "apps/macos/dist-runtime/**/*",
+      "node_modules/ws/**/*",
+      "package.json"
+    ],
+    "artifactName": "Sonora Connect-${version}.${ext}",
+    "extraResources": [
+      {
+        "from": "apps/macos/assets/icon.png",
+        "to": "icon.png"
+      }
+    ]
+  },
+  "scripts": {
+    "dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "build": "tsc -b && vite build && tsc -p apps/macos/runtime/tsconfig.json",
+    "build:shared": "tsc -b && vite build",
+    "android:sync": "pnpm build:shared && pnpm --dir apps/mobile cap sync android",
+    "android:build": "pnpm android:sync && pnpm --dir apps/mobile android:debug",
+    "android:run": "pnpm android:sync && pnpm --dir apps/mobile cap run android",
+    "mac:driver:build": "zsh native/macos/virtual-mic/build-driver.sh",
+    "mac:driver:package": "pnpm mac:driver:build && zsh scripts/build-driver-pkg.sh",
+    "mac:app": "pnpm build && electron-builder --mac dir",
+    "mac:dmg": "pnpm build && electron-builder --mac dmg",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --pretty false",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "@capacitor/barcode-scanner": "latest",
+    "lucide-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "qrcode": "latest",
+    "vite": "latest",
+    "ws": "latest"
+  },
+  "devDependencies": {
+    "@capacitor/android": "latest",
+    "@capacitor/cli": "latest",
+    "@capacitor/core": "latest",
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/react": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@types/qrcode": "latest",
+    "@types/ws": "latest",
+    "concurrently": "latest",
+    "electron": "latest",
+    "electron-builder": "latest",
+    "jsdom": "latest",
+    "typescript": "latest",
+    "vitest": "latest",
+    "wait-on": "latest"
+  }
+}

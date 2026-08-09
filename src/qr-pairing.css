@@ -1,0 +1,55 @@
+.qr-scan-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px;
+  border: 1px solid #7659d8;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #8060e72b, #5f41c51c);
+  color: #bda9ff;
+  text-align: left;
+}
+
+.qr-scan-button span {
+  display: grid;
+  gap: 3px;
+}
+
+.qr-scan-button strong {
+  color: #e1daf9;
+  font-size: 13px;
+}
+
+.qr-scan-button small {
+  color: #7d748f;
+  font-size: 9px;
+}
+
+.pairing-separator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 19px 0 5px;
+  color: #555b67;
+  font-size: 9px;
+}
+
+.pairing-separator::before,
+.pairing-separator::after {
+  height: 1px;
+  flex: 1;
+  background: #292d37;
+  content: "";
+}
+
+@media (max-width: 760px) {
+  .header-actions .discover-button,
+  .header-actions .remote-connected {
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+    padding: 0;
+    font-size: 0;
+  }
+}

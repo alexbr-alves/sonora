@@ -1,0 +1,17 @@
+node_modules/
+.pnpm-store/
+dist/
+dist-electron/
+apps/macos/dist-runtime/
+.DS_Store
+*.log
+release/
+native/macos/virtual-mic/build/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+apps/mobile/android/.gradle/
+apps/mobile/android/app/build/
+apps/mobile/android/build/
+apps/mobile/android/local.properties
+apps/macos/assets/icon-liquid-glass-source.png
