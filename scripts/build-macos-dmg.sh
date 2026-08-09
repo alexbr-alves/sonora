@@ -60,8 +60,8 @@ tell application "Finder"
     set the bounds of container window to {120, 120, 780, 540}
     set viewOptions to the icon view options of container window
     set arrangement of viewOptions to not arranged
-    set icon size of viewOptions to 96
-    set text size of viewOptions to 13
+    set icon size of viewOptions to 128
+    set text size of viewOptions to 14
     set background picture of viewOptions to file ".background:background.png"
     set position of item "Sonora Connect.app" of container window to {190, 215}
     set position of item "Aplicativos" of container window to {470, 215}
