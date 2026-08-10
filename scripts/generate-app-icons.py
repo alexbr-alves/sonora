@@ -12,7 +12,7 @@ MACOS_ASSETS = ROOT / "apps/macos/assets"
 PURPLE_HUE = 255 / 360
 
 
-def recolor_blue_to_sonora(image: Image.Image) -> Image.Image:
+def recolor_blue_to_talos(image: Image.Image) -> Image.Image:
     rgba = image.convert("RGBA")
     pixels = []
     for red, green, blue, alpha in rgba.getdata():
@@ -31,7 +31,7 @@ def main() -> None:
         raise SystemExit("Nenhum ícone Android encontrado")
 
     for path in launcher_files:
-        recolor_blue_to_sonora(Image.open(path)).save(path, optimize=True)
+        recolor_blue_to_talos(Image.open(path)).save(path, optimize=True)
 
     source = ANDROID_RES / "mipmap-xxxhdpi/ic_launcher.png"
     MACOS_ASSETS.mkdir(parents=True, exist_ok=True)

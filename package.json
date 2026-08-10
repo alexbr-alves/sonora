@@ -1,9 +1,9 @@
 {
-  "name": "sonora",
-  "productName": "Sonora Connect",
+  "name": "talos",
+  "productName": "Talos Connect",
   "version": "0.1.0",
   "private": true,
-  "description": "Sonora: áudios instantâneos para reuniões, chamadas e jogos",
+  "description": "Talos: controle sons, aplicativos e ações pelo Android",
   "author": {
     "name": "alexbr-alves",
     "email": "alexbr.alves@gmail.com"
@@ -36,15 +36,15 @@
           "arch": ["x64"]
         }
       ],
-      "artifactName": "Sonora-Windows.${ext}"
+      "artifactName": "Talos-Windows.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Sonora Connect",
-      "uninstallDisplayName": "Sonora Connect"
+      "shortcutName": "Talos Connect",
+      "uninstallDisplayName": "Talos Connect"
     },
     "directories": {
       "output": "release/macos"
@@ -55,7 +55,7 @@
       "node_modules/ws/**/*",
       "package.json"
     ],
-    "artifactName": "Sonora Connect-${version}.${ext}",
+    "artifactName": "Talos Connect-${version}.${ext}",
     "extraResources": [
       {
         "from": "apps/macos/assets/icon.png",

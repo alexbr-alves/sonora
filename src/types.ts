@@ -9,6 +9,16 @@ export interface SoundPad {
   color: PadColor;
   duration?: number;
   sourceId?: string;
+  actionType?: "sound" | "application";
+  applicationId?: string;
+  applicationIcon?: string;
+  applicationAccent?: string;
+}
+
+export interface ComputerApplication {
+  id: string;
+  name: string;
+  icon?: string;
 }
 
 export interface SoundLayout {

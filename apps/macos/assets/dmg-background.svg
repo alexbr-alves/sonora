@@ -21,7 +21,7 @@
   <ellipse cx="330" cy="220" rx="230" ry="135" fill="url(#glow)" filter="url(#blur)"/>
 
   <text x="330" y="54" fill="#2b2339" font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-        font-size="22" font-weight="650" text-anchor="middle">Instale o Sonora Connect</text>
+        font-size="22" font-weight="650" text-anchor="middle">Instale o Talos Connect</text>
   <text x="330" y="82" fill="#655b76" font-family="-apple-system, BlinkMacSystemFont, sans-serif"
         font-size="14" text-anchor="middle">Arraste o aplicativo para a pasta Aplicativos</text>
 
@@ -31,5 +31,5 @@
 
   <rect x="24" y="366" width="612" height="1" fill="#514565" opacity="0.12"/>
   <text x="330" y="392" fill="#746a83" font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-        font-size="11" text-anchor="middle">Sonora · Sua voz. Seus sons. Uma só entrada.</text>
+        font-size="11" text-anchor="middle">Talos · Sons, aplicativos e ações em um só lugar.</text>
 </svg>

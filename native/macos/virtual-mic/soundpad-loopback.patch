@@ -33,7 +33,7 @@
  			//	This is the human readable name of the device.
  			FailWithAction(inDataSize < sizeof(CFStringRef), theAnswer = kAudioHardwareBadPropertySizeError, Done, "NullAudio_GetDevicePropertyData: not enough space for the return value of kAudioObjectPropertyName for the device");
 -			*((CFStringRef*)outData) = CFSTR("DeviceName");
-+			*((CFStringRef*)outData) = CFSTR("Sonora Mix");
++			*((CFStringRef*)outData) = CFSTR("Talos Mix");
  			*outDataSize = sizeof(CFStringRef);
  			break;
  			

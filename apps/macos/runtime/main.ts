@@ -1,9 +1,11 @@
-import { app, BrowserWindow, dialog, globalShortcut, ipcMain } from "electron";
+import { app, BrowserWindow, dialog, globalShortcut, ipcMain, nativeImage, shell } from "electron";
 import type { MessageBoxOptions } from "electron";
 import { execFile } from "node:child_process";
 import path from "node:path";
 import { existsSync } from "node:fs";
-import { networkInterfaces } from "node:os";
+import { readFile, readdir, unlink } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { homedir, networkInterfaces } from "node:os";
 import { promisify } from "node:util";
 import { WebSocket, WebSocketServer } from "ws";
 
@@ -20,8 +22,17 @@ const allowedCategories = new Set([
   "anime & manga", "games", "memes", "movies", "music", "politics", "pranks",
   "reactions", "sound effects", "sports", "television", "tiktok trends", "viral", "whatsapp audios"
 ]);
+type InstalledApplication = {
+  id: string;
+  name: string;
+  icon?: string;
+  launchKind: "path" | "windows-app-id";
+  launchTarget: string;
+};
+let installedApplications = new Map<string, InstalledApplication>();
+const applicationIconCache = new Map<string, string | undefined>();
 
-app.setName("Sonora Connect");
+app.setName("Talos Connect");
 
 function showMessage(options: MessageBoxOptions) {
   return mainWindow ? dialog.showMessageBox(mainWindow, options) : dialog.showMessageBox(options);
@@ -34,17 +45,17 @@ async function ensureVirtualMicrophone() {
   if (!existsSync(bundledDriverPath)) {
     await showMessage({
       type: "error",
-      title: "Sonora Mix indisponível",
-      message: "O driver do Sonora Mix não foi encontrado dentro do aplicativo.",
-      detail: "Baixe novamente o Sonora pelo repositório oficial."
+      title: "Talos Mix indisponível",
+      message: "O driver do Talos Mix não foi encontrado dentro do aplicativo.",
+      detail: "Baixe novamente o Talos pelo repositório oficial."
     });
     return;
   }
 
   const choice = await showMessage({
     type: "info",
-    title: "Ativar Sonora Mix",
-    message: "Instale a entrada de áudio Sonora Mix",
+    title: "Ativar Talos Mix",
+    message: "Instale a entrada de áudio Talos Mix",
     detail: "Ela permite combinar sua voz com os sons do Android em chamadas, jogos e reuniões. O macOS solicitará sua senha uma única vez.",
     buttons: ["Instalar agora", "Mais tarde"],
     defaultId: 0,
@@ -63,17 +74,17 @@ end run`;
     await execFileAsync("/usr/bin/osascript", ["-e", appleScript, "--", bundledDriverPath, installedDriverPath]);
     await showMessage({
       type: "info",
-      title: "Sonora Mix instalado",
+      title: "Talos Mix instalado",
       message: "A entrada de áudio está pronta.",
-      detail: "Selecione Sonora Mix como microfone no aplicativo da sua chamada ou jogo."
+      detail: "Selecione Talos Mix como microfone no aplicativo da sua chamada ou jogo."
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "A instalação foi cancelada.";
     await showMessage({
       type: "error",
-      title: "Não foi possível instalar o Sonora Mix",
+      title: "Não foi possível instalar o Talos Mix",
       message: "A entrada de áudio não foi instalada.",
-      detail: message.includes("User canceled") ? "Você pode tentar novamente ao reabrir o Sonora Connect." : message
+      detail: message.includes("User canceled") ? "Você pode tentar novamente ao reabrir o Talos Connect." : message
     });
   }
 }
@@ -109,7 +120,7 @@ async function fetchCatalog(query?: string, category?: string) {
   else if (category && allowedCategories.has(category)) {
     url = `${myInstantsOrigin}/pt/categories/${encodeURIComponent(category)}/br/`;
   }
-  const response = await fetch(url, { headers: { "User-Agent": "Sonora/0.1 (+local client)" } });
+  const response = await fetch(url, { headers: { "User-Agent": "Talos/0.1 (+local client)" } });
   if (!response.ok) throw new Error(`MyInstants respondeu ${response.status}`);
   return parseMyInstants(await response.text());
 }
@@ -124,9 +135,149 @@ function send(socket: WebSocket, payload: object) {
   if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(payload));
 }
 
+function applicationId(target: string) {
+  const normalized = process.platform === "win32" ? target.toLowerCase() : target;
+  return createHash("sha256").update(normalized).digest("hex").slice(0, 24);
+}
+
+async function collectFiles(root: string, extensions: Set<string>, maxDepth: number, depth = 0): Promise<string[]> {
+  if (depth > maxDepth) return [];
+  let entries;
+  try {
+    entries = await readdir(root, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  const found: string[] = [];
+  for (const entry of entries) {
+    const entryPath = path.join(root, entry.name);
+    const extension = path.extname(entry.name).toLowerCase();
+    if (entry.isDirectory() && extensions.has(extension)) {
+      found.push(entryPath);
+    } else if (entry.isFile() && extensions.has(extension)) {
+      found.push(entryPath);
+    } else if (entry.isDirectory()) {
+      found.push(...await collectFiles(entryPath, extensions, maxDepth, depth + 1));
+    }
+  }
+  return found;
+}
+
+async function applicationPaths() {
+  if (process.platform === "darwin") {
+    const roots = ["/Applications", path.join(homedir(), "Applications"), "/System/Applications"];
+    return (await Promise.all(roots.map((root) => collectFiles(root, new Set([".app"]), 2)))).flat();
+  }
+  if (process.platform === "win32") {
+    const roots = [
+      process.env.APPDATA && path.join(process.env.APPDATA, "Microsoft", "Windows", "Start Menu", "Programs"),
+      process.env.ProgramData && path.join(process.env.ProgramData, "Microsoft", "Windows", "Start Menu", "Programs")
+    ].filter((root): root is string => Boolean(root));
+    return (await Promise.all(roots.map((root) => collectFiles(root, new Set([".lnk", ".exe"]), 5)))).flat();
+  }
+  return [];
+}
+
+async function macApplicationIcon(applicationPath: string) {
+  const infoPlist = path.join(applicationPath, "Contents", "Info.plist");
+  for (const key of ["CFBundleIconFile", "CFBundleIconName"]) {
+    try {
+      const { stdout } = await execFileAsync("/usr/bin/plutil", ["-extract", key, "raw", "-o", "-", infoPlist]);
+      const declaredName = stdout.trim();
+      if (!declaredName) continue;
+      const fileName = path.extname(declaredName) ? declaredName : `${declaredName}.icns`;
+      const iconPath = path.join(applicationPath, "Contents", "Resources", fileName);
+      const outputPath = path.join(app.getPath("temp"), `talos-app-icon-${applicationId(applicationPath)}.png`);
+      try {
+        await execFileAsync("/usr/bin/sips", ["-z", "64", "64", "-s", "format", "png", iconPath, "--out", outputPath]);
+        const png = await readFile(outputPath);
+        if (png.length) return `data:image/png;base64,${png.toString("base64")}`;
+      } finally {
+        await unlink(outputPath).catch(() => undefined);
+      }
+    } catch {
+      // Tenta a próxima chave e depois o método genérico do sistema.
+    }
+  }
+  return undefined;
+}
+
+async function applicationIcon(applicationPath: string) {
+  if (applicationIconCache.has(applicationPath)) return applicationIconCache.get(applicationPath);
+  let result: string | undefined;
+  if (process.platform === "darwin") {
+    const icon = await macApplicationIcon(applicationPath);
+    if (icon) result = icon;
+  }
+  if (!result) {
+    try {
+      const image = await app.getFileIcon(applicationPath, { size: "normal" });
+      if (!image.isEmpty()) result = image.resize({ width: 64, height: 64, quality: "good" }).toDataURL();
+    } catch {
+      // O Android usará o ícone genérico somente para este aplicativo.
+    }
+  }
+  applicationIconCache.set(applicationPath, result);
+  return result;
+}
+
+async function scanInstalledApplications() {
+  const paths = [...new Set(await applicationPaths())];
+  const applications: InstalledApplication[] = [];
+  const candidates = paths.slice(0, 300);
+  for (let index = 0; index < candidates.length; index += 16) {
+    const batch = await Promise.all(candidates.slice(index, index + 16).map(async (launchPath) => ({
+      id: applicationId(launchPath),
+      name: path.basename(launchPath, path.extname(launchPath)),
+      icon: await applicationIcon(launchPath),
+      launchKind: "path" as const,
+      launchTarget: launchPath
+    })));
+    applications.push(...batch);
+  }
+  if (process.platform === "win32") {
+    try {
+      const { stdout } = await execFileAsync("powershell.exe", [
+        "-NoProfile", "-NonInteractive", "-Command",
+        "Get-StartApps | Select-Object Name,AppID | ConvertTo-Json -Compress"
+      ], { windowsHide: true, maxBuffer: 4 * 1024 * 1024 });
+      const parsed = JSON.parse(stdout) as { Name?: string; AppID?: string } | Array<{ Name?: string; AppID?: string }>;
+      const startApps = Array.isArray(parsed) ? parsed : [parsed];
+      const existingNames = new Set(applications.map((application) => application.name.toLocaleLowerCase()));
+      for (const startApp of startApps) {
+        if (!startApp.Name || !startApp.AppID || existingNames.has(startApp.Name.toLocaleLowerCase())) continue;
+        applications.push({
+          id: applicationId(`windows-app-id:${startApp.AppID}`),
+          name: startApp.Name,
+          launchKind: "windows-app-id",
+          launchTarget: startApp.AppID
+        });
+        existingNames.add(startApp.Name.toLocaleLowerCase());
+      }
+    } catch {
+      // A lista de atalhos continua disponível em versões sem Get-StartApps.
+    }
+  }
+  applications.sort((left, right) => left.name.localeCompare(right.name, "pt-BR", { sensitivity: "base" }));
+  installedApplications = new Map(applications.map((application) => [application.id, application]));
+  return applications;
+}
+
+async function launchInstalledApplication(id: string) {
+  if (!installedApplications.has(id)) await scanInstalledApplications();
+  const application = installedApplications.get(id);
+  if (!application) throw new Error("Este aplicativo não está mais instalado neste computador");
+  if (application.launchKind === "windows-app-id") {
+    await execFileAsync("explorer.exe", [`shell:AppsFolder\\${application.launchTarget}`], { windowsHide: true });
+    return;
+  }
+  const error = await shell.openPath(application.launchTarget);
+  if (error) throw new Error(error);
+}
+
 function startRemoteServer() {
   remoteServer = new WebSocketServer({ host: "0.0.0.0", port: remotePort, maxPayload: 64 * 1024 * 1024 });
-  console.log(`[Sonora Connect] ws://${localAddresses()[0] ?? "IP_DO_COMPUTADOR"}:${remotePort} PIN ${pairingPin}`);
+  console.log(`[Talos Connect] ws://${localAddresses()[0] ?? "IP_DO_COMPUTADOR"}:${remotePort} PIN ${pairingPin}`);
   remoteServer.on("connection", (socket) => {
     let paired = false;
     mainWindow?.webContents.send("remote:status", "Celular encontrado. Aguardando PIN...");
@@ -145,6 +296,7 @@ function startRemoteServer() {
           query?: string;
           category?: string;
           audioUrl?: string;
+          applicationId?: string;
         };
         if (message.type === "pair") {
           if (message.pin !== pairingPin) {
@@ -160,6 +312,22 @@ function startRemoteServer() {
           return;
         }
         if (!paired) return;
+        if (message.type === "applications" && message.requestId) {
+          void scanInstalledApplications()
+            .then((applications) => send(socket, {
+              type: "applications-results",
+              requestId: message.requestId,
+              applications: applications.map(({ id, name, icon }) => ({ id, name, icon }))
+            }))
+            .catch((error) => send(socket, { type: "application-error", requestId: message.requestId, message: error instanceof Error ? error.message : "Falha ao listar aplicativos" }));
+          return;
+        }
+        if (message.type === "launch-application" && message.requestId && message.applicationId) {
+          void launchInstalledApplication(message.applicationId)
+            .then(() => send(socket, { type: "application-launched", requestId: message.requestId }))
+            .catch((error) => send(socket, { type: "application-error", requestId: message.requestId, message: error instanceof Error ? error.message : "Falha ao abrir aplicativo" }));
+          return;
+        }
         if (message.type === "catalog" && message.requestId) {
           void fetchCatalog(message.query, message.category)
             .then((items) => send(socket, { type: "catalog-results", requestId: message.requestId, items }))

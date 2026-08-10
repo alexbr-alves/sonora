@@ -2,10 +2,10 @@
 set -euo pipefail
 
 project_dir=${0:A:h:h}
-app="$project_dir/release/macos/mac-arm64/Sonora Connect.app"
-work_dir=$(mktemp -d /private/tmp/sonora-dmg-build.XXXXXX)
+app="$project_dir/release/macos/mac-arm64/Talos Connect.app"
+work_dir=$(mktemp -d /private/tmp/talos-dmg-build.XXXXXX)
 dmg_root="$work_dir/root"
-rw_dmg="$work_dir/Sonora-rw.dmg"
+rw_dmg="$work_dir/Talos-rw.dmg"
 mkdir -p "$dmg_root"
 mount_dir=""
 mounted=false
@@ -16,11 +16,11 @@ cleanup() {
 trap cleanup EXIT
 
 if [[ ! -d "$app" ]]; then
-  print -u2 "O aplicativo Sonora Connect ainda não foi gerado."
+  print -u2 "O aplicativo Talos Connect ainda não foi gerado."
   exit 1
 fi
 
-COPYFILE_DISABLE=1 ditto --noextattr --norsrc "$app" "$dmg_root/Sonora Connect.app"
+COPYFILE_DISABLE=1 ditto --noextattr --norsrc "$app" "$dmg_root/Talos Connect.app"
 ln -s /Applications "$dmg_root/Aplicativos"
 mkdir -p "$dmg_root/.background"
 sips -s format png "$project_dir/apps/macos/assets/dmg-background.svg" \
@@ -30,11 +30,11 @@ xattr -cr "$dmg_root"
 # Sem uma conta Apple Developer não há assinatura pública, mas a assinatura
 # ad-hoc mantém todos os componentes internos íntegros. A cópia temporária
 # também evita metadados do Finder adicionados pela pasta de desenvolvimento.
-codesign --force --deep --sign - "$dmg_root/Sonora Connect.app"
-codesign --verify --deep --strict --verbose=2 "$dmg_root/Sonora Connect.app"
+codesign --force --deep --sign - "$dmg_root/Talos Connect.app"
+codesign --verify --deep --strict --verbose=2 "$dmg_root/Talos Connect.app"
 
 hdiutil create \
-  -volname "Sonora Connect" \
+  -volname "Talos Connect" \
   -srcfolder "$dmg_root" \
   -ov \
   -format UDRW \
@@ -63,7 +63,7 @@ tell application "Finder"
     set icon size of viewOptions to 128
     set text size of viewOptions to 14
     set background picture of viewOptions to file ".background:background.png"
-    set position of item "Sonora Connect.app" of container window to {190, 215}
+    set position of item "Talos Connect.app" of container window to {190, 215}
     set position of item "Aplicativos" of container window to {470, 215}
     update without registering applications
     delay 2
@@ -81,6 +81,6 @@ hdiutil convert "$rw_dmg" \
   -format UDZO \
   -imagekey zlib-level=9 \
   -ov \
-  -o "$project_dir/release/Sonora.dmg" >/dev/null
+  -o "$project_dir/release/Talos.dmg" >/dev/null
 
-print "DMG criado em: $project_dir/release/Sonora.dmg"
+print "DMG criado em: $project_dir/release/Talos.dmg"

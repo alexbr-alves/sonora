@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
-import { ArrowLeft, Grid3X3, LoaderCircle, Play, Plus, Search, Sparkles, Trash2, X } from "lucide-react";
+import { ArrowLeft, Grid3X3, LoaderCircle, Pause, Play, Plus, Search, Sparkles, Trash2, X } from "lucide-react";
 import type { CatalogItem, SoundLayout, SoundPad } from "./types";
 import "./catalog.css";
 
@@ -18,6 +18,7 @@ interface CatalogViewProps {
   connected?: boolean;
   searchCatalog: (query?: string, category?: string) => Promise<CatalogItem[]>;
   playDirect: (item: CatalogItem) => Promise<void>;
+  stopDirect: () => void;
   downloadAudio: (item: CatalogItem) => Promise<Blob>;
   layouts: SoundLayout[];
   libraryPads: SoundPad[];
@@ -26,7 +27,7 @@ interface CatalogViewProps {
   onBack: () => void;
 }
 
-export default function CatalogView({ connected = false, searchCatalog, playDirect, downloadAudio, layouts, libraryPads, onAdd, onRemove, onBack }: CatalogViewProps) {
+export default function CatalogView({ connected = false, searchCatalog, playDirect, stopDirect, downloadAudio, layouts, libraryPads, onAdd, onRemove, onBack }: CatalogViewProps) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const [items, setItems] = useState<CatalogItem[]>([]);
@@ -34,6 +35,7 @@ export default function CatalogView({ connected = false, searchCatalog, playDire
   const [message, setMessage] = useState("");
   const [busyId, setBusyId] = useState("");
   const [pendingItem, setPendingItem] = useState<CatalogItem | null>(null);
+  const [playingId, setPlayingId] = useState("");
 
   async function load(nextQuery = "", nextCategory = category) {
     setLoading(true);
@@ -64,11 +66,19 @@ export default function CatalogView({ connected = false, searchCatalog, playDire
   }
 
   async function play(item: CatalogItem) {
+    if (playingId === item.id) {
+      stopDirect();
+      setPlayingId("");
+      return;
+    }
+    stopDirect();
     setBusyId(item.id);
+    setPlayingId(item.id);
     setMessage("");
     try {
       await playDirect(item);
     } catch (error) {
+      setPlayingId("");
       setMessage(error instanceof Error ? error.message : "Não foi possível reproduzir o áudio");
     } finally {
       setBusyId("");
@@ -94,7 +104,7 @@ export default function CatalogView({ connected = false, searchCatalog, playDire
       <form className="catalog-search" onSubmit={submit}><Search size={19} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar memes, efeitos, frases..." minLength={2} /><button>Buscar</button></form>
       <div className="category-row">{categories.map(([label, value]) => <button key={label} className={category === value && !query ? "active" : ""} onClick={() => selectCategory(value)}>{label}</button>)}</div>
       <div className="catalog-meta"><span>{loading ? "Buscando..." : `${items.length} resultados`}</span><span>{connected ? "Reprodução no computador" : "Reprodução neste aparelho"}</span></div>
-      {loading ? <div className="catalog-loading"><LoaderCircle size={28} /> Carregando sons</div> : message ? <div className="catalog-empty">{message}</div> : <section className="catalog-grid">{items.map((item) => { const existing = libraryPads.find((pad) => pad.sourceId === item.id); return <article key={item.id} className="catalog-item direct"><button className="catalog-play" aria-label={`Reproduzir ${item.name}`} onClick={() => void play(item)} disabled={busyId === item.id}>{busyId === item.id ? <LoaderCircle size={20} /> : <Play size={20} fill="currentColor" />}</button><button className="catalog-name" title={item.name} aria-label={`Reproduzir ${item.name}`} onClick={() => void play(item)} disabled={busyId === item.id}>{shortenLabel(item.name)}</button><button aria-label={existing ? `Remover ${item.name} da biblioteca` : `Adicionar ${item.name} à biblioteca`} className={`catalog-add ${existing ? "remove" : ""}`} onClick={() => existing ? void onRemove(item.id) : setPendingItem(item)} disabled={busyId === item.id}>{existing ? <Trash2 size={17} /> : <Plus size={18} />}</button></article>; })}</section>}
+      {loading ? <div className="catalog-loading"><LoaderCircle size={28} /> Carregando sons</div> : message ? <div className="catalog-empty">{message}</div> : <section className="catalog-grid">{items.map((item) => { const existing = libraryPads.find((pad) => pad.sourceId === item.id); const isPlaying = playingId === item.id; return <article key={item.id} className={`catalog-item direct ${isPlaying ? "playing" : ""}`}><button className="catalog-play" aria-label={`${isPlaying ? "Pausar" : "Reproduzir"} ${item.name}`} onClick={() => void play(item)} disabled={busyId === item.id}>{busyId === item.id ? <LoaderCircle size={20} /> : isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}</button><button className="catalog-name" title={item.name} aria-label={`${isPlaying ? "Pausar" : "Reproduzir"} ${item.name}`} onClick={() => void play(item)} disabled={busyId === item.id}>{shortenLabel(item.name)}</button><button aria-label={existing ? `Remover ${item.name} da biblioteca` : `Adicionar ${item.name} à biblioteca`} className={`catalog-add ${existing ? "remove" : ""}`} onClick={() => existing ? void onRemove(item.id) : setPendingItem(item)} disabled={busyId === item.id}>{existing ? <Trash2 size={17} /> : <Plus size={18} />}</button></article>; })}</section>}
       {pendingItem && <div className="catalog-layout-backdrop"><section className="catalog-layout-picker"><header><div><span>ESCOLHER LAYOUT</span><h2>Adicionar “{shortenLabel(pendingItem.name, 28)}”</h2></div><button onClick={() => setPendingItem(null)}><X size={18} /></button></header><div>{layouts.map((layout) => { const full = layout.padIds.length >= layout.rows * layout.columns; return <button key={layout.id} disabled={full} onClick={() => void add(pendingItem, layout.id)}><Grid3X3 size={18} /><span><strong>{layout.name}</strong><small>{full ? "Layout cheio" : `${layout.padIds.length}/${layout.rows * layout.columns} posições`}</small></span></button>; })}</div></section></div>}
     </main>
   );

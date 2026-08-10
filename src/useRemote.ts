@@ -1,15 +1,16 @@
 import { Capacitor } from "@capacitor/core";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { CatalogItem, SoundPad } from "./types";
+import type { CatalogItem, ComputerApplication, SoundPad } from "./types";
 import { getAudioBlob } from "./storage";
 import { fetchCatalogAudioOnDevice, searchCatalogOnDevice } from "./catalogClient";
 
 type RemoteMessage = {
-  type: "paired" | "pair-error" | "error" | "catalog-results" | "catalog-played" | "catalog-audio-result" | "catalog-error";
+  type: "paired" | "pair-error" | "error" | "catalog-results" | "catalog-played" | "catalog-audio-result" | "catalog-error" | "applications-results" | "application-launched" | "application-error";
   message?: string;
   requestId?: string;
   items?: CatalogItem[];
   audioData?: string;
+  applications?: ComputerApplication[];
 };
 
 const reconnectGraceMs = 10 * 60 * 1000;
@@ -33,6 +34,8 @@ export function useRemote() {
   const playRequests = useRef(new Map<string, { resolve: () => void; reject: (error: Error) => void }>());
   const audioRequests = useRef(new Map<string, { resolve: (blob: Blob) => void; reject: (error: Error) => void }>());
   const localCatalogAudio = useRef<HTMLAudioElement | null>(null);
+  const applicationRequests = useRef(new Map<string, { resolve: (applications: ComputerApplication[]) => void; reject: (error: Error) => void }>());
+  const launchRequests = useRef(new Map<string, { resolve: () => void; reject: (error: Error) => void }>());
 
   const disconnect = useCallback(() => {
     shouldReconnect.current = false;
@@ -94,6 +97,18 @@ export function useRemote() {
         catalogRequests.current.delete(message.requestId);
         playRequests.current.delete(message.requestId);
         audioRequests.current.delete(message.requestId);
+      } else if (message.type === "applications-results" && message.requestId) {
+        applicationRequests.current.get(message.requestId)?.resolve(message.applications ?? []);
+        applicationRequests.current.delete(message.requestId);
+      } else if (message.type === "application-launched" && message.requestId) {
+        launchRequests.current.get(message.requestId)?.resolve();
+        launchRequests.current.delete(message.requestId);
+      } else if (message.type === "application-error" && message.requestId) {
+        const error = new Error(message.message ?? "Não foi possível abrir o aplicativo");
+        applicationRequests.current.get(message.requestId)?.reject(error);
+        launchRequests.current.get(message.requestId)?.reject(error);
+        applicationRequests.current.delete(message.requestId);
+        launchRequests.current.delete(message.requestId);
       }
     };
     socket.onerror = () => setStatus("Não foi possível alcançar o computador");
@@ -226,5 +241,25 @@ export function useRemote() {
     });
   }, []);
 
-  return { isMobile, host, setHost, pin, setPin, status, setStatus, connected, connect, connectFromQr, disconnect, play, stop, searchCatalog, playCatalog, downloadCatalogAudio };
+  const listApplications = useCallback(() => {
+    const socket = socketRef.current;
+    if (socket?.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Conecte o Talos ao computador para ver os aplicativos"));
+    return new Promise<ComputerApplication[]>((resolve, reject) => {
+      const requestId = crypto.randomUUID();
+      applicationRequests.current.set(requestId, { resolve, reject });
+      socket.send(JSON.stringify({ type: "applications", requestId }));
+    });
+  }, []);
+
+  const launchApplication = useCallback((applicationId: string) => {
+    const socket = socketRef.current;
+    if (socket?.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Conecte o Talos ao computador para abrir este aplicativo"));
+    return new Promise<void>((resolve, reject) => {
+      const requestId = crypto.randomUUID();
+      launchRequests.current.set(requestId, { resolve, reject });
+      socket.send(JSON.stringify({ type: "launch-application", requestId, applicationId }));
+    });
+  }, []);
+
+  return { isMobile, host, setHost, pin, setPin, status, setStatus, connected, connect, connectFromQr, disconnect, play, stop, searchCatalog, playCatalog, downloadCatalogAudio, listApplications, launchApplication };
 }

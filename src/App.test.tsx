@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import App from "./App";
 
-describe("Sonora", () => {
+describe("Talos", () => {
   beforeEach(() => localStorage.clear());
 
   it("mostra a biblioteca vazia e a acao de importacao", () => {

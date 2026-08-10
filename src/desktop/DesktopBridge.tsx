@@ -4,7 +4,7 @@ import QRCode from "qrcode";
 
 type RemoteInfo = { addresses: string[]; port: number; pin: string };
 type SinkableAudio = HTMLAudioElement & { setSinkId?: (id: string) => Promise<void> };
-const virtualMicName = "Sonora Mix";
+const virtualMicName = "Talos Mix";
 const legacyVirtualMicName = "Soundpad Mix (Voz + Áudios)";
 
 function isVirtualMic(label: string) {
@@ -131,7 +131,7 @@ export default function DesktopBridge() {
   useEffect(() => {
     const host = info?.addresses[0];
     if (!info || !host) return;
-    const payload = `sonora://pair?host=${encodeURIComponent(host)}&port=${info.port}&pin=${info.pin}`;
+    const payload = `talos://pair?host=${encodeURIComponent(host)}&port=${info.port}&pin=${info.pin}`;
     void QRCode.toDataURL(payload, {
       width: 180, margin: 1, color: { dark: "#16121f", light: "#ffffff" }, errorCorrectionLevel: "M"
     }).then(setQrCode);
@@ -159,7 +159,7 @@ export default function DesktopBridge() {
     <main className="bridge">
       <header className="bridge-header">
         <div className="bridge-logo"><Radio size={20} /></div>
-        <div><h1>Sonora Connect</h1><p>Conecte o Sonora às suas chamadas</p></div>
+        <div><h1>Talos Connect</h1><p>Conecte o Talos às suas chamadas</p></div>
         <span className={`connection-light ${connected ? "online" : ""}`} />
       </header>
 
@@ -175,7 +175,7 @@ export default function DesktopBridge() {
       </section>
 
       <section className="bridge-card route-card">
-        <div className="output-title"><Mic2 size={18} /><div><label>MIX DA CHAMADA</label><p>{virtualMicReady ? `${virtualMicName} · ${voiceReady ? "voz e áudios prontos" : "aguardando microfone"}` : "O Sonora Mix precisa ser ativado"}</p></div><span className={`route-dot ${virtualMicReady && voiceReady ? "ready" : ""}`} /></div>
+        <div className="output-title"><Mic2 size={18} /><div><label>MIX DA CHAMADA</label><p>{virtualMicReady ? `${virtualMicName} · ${voiceReady ? "voz e áudios prontos" : "aguardando microfone"}` : "O Talos Mix precisa ser ativado"}</p></div><span className={`route-dot ${virtualMicReady && voiceReady ? "ready" : ""}`} /></div>
 
         <div className="monitor-row">
           <div className="output-title"><Headphones size={18} /><div><label>RETORNO</label><p>Ouça os pads no seu fone</p></div></div>
