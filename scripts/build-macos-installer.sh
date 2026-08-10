@@ -22,7 +22,7 @@ xattr -cr "$package_root"
 pkgbuild \
   --root "$package_root" \
   --identifier "com.sonora.installer" \
-  --version "0.1.0" \
+  --version "0.2.0" \
   --install-location / \
   --scripts "$project_dir/native/macos/virtual-mic/pkg-scripts" \
   "$project_dir/release/Talos.pkg"
